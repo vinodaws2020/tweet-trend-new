@@ -7,7 +7,7 @@ pipeline {
 
     tools {
         // Optional: Ensure Maven is set via Jenkins tool config if not using /opt directly
-        // maven 'maven-3.9.4' 
+        maven 'maven-3.9.4' 
     }
 
     stages {
