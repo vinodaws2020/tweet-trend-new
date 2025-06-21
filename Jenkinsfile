@@ -5,32 +5,46 @@ pipeline {
         PATH = "/opt/apache-maven-3.9.4/bin:$PATH"
     }
 
+    tools {
+        // Optional: Ensure Maven is set via Jenkins tool config if not using /opt directly
+        // maven 'maven-3.9.4' 
+    }
+
     stages {
-        stage("build") {
+        stage("Build") {
             steps {
-                echo "------- build started --------"
+                echo "------- Build started --------"
                 sh 'mvn clean deploy -Dmaven.test.skip=true'
-                echo "---------build completed ----------"
+                echo "------- Build completed -------"
             }
         }
 
-        stage("test") {
+        stage("Unit Test Report") {
             steps {
-                echo "--------unit test started ---------"
+                echo "-------- Unit test report generation started ---------"
                 sh 'mvn surefire-report:report'
-                echo "---------unit test completed -------"
+                echo "-------- Unit test report generation completed ---------"
             }
         }
 
-        stage("SonarQube analysis") {
+        stage("SonarQube Analysis") {
             environment {
-                scannerHome = tool 'sonar-scanner'
+                scannerHome = tool 'sonar-scanner' // Jenkins tool name for Sonar Scanner
             }
             steps {
-                withSonarQubeEnv('sonarqube-server') {
+                withSonarQubeEnv('sonarqube-server') { // Jenkins SonarQube server name
                     sh "${scannerHome}/bin/sonar-scanner"
                 }
             }
+        }
+    }
+
+    post {
+        always {
+            echo 'Pipeline execution completed.'
+        }
+        failure {
+            echo 'Pipeline failed.'
         }
     }
 }
