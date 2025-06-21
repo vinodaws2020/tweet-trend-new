@@ -4,6 +4,7 @@ pipeline {
     environment {
         PATH = "/opt/apache-maven-3.9.4/bin:$PATH"
     }
+
     stages {
         stage("Build") {
             steps {
@@ -31,6 +32,19 @@ pipeline {
                 }
             }
         }
+
+        stage("Quality Gate") {
+            steps {
+                script {
+                    timeout(time: 1, unit: 'HOURS') {
+                        def qg = waitForQualityGate()
+                        if (qg.status != 'OK') {
+                            error "Pipeline aborted due to quality gate failure: ${qg.status}"
+                        }
+                    }
+                }
+            }
+        }
     }
 
     post {
@@ -42,3 +56,4 @@ pipeline {
         }
     }
 }
+
