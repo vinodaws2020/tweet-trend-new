@@ -1,4 +1,6 @@
 def registry = 'https://trialiu989t.jfrog.io'
+def imageName = 'trialiu989t.jfrog.io/icmcloud-docker-local/namtrend'
+def version   = '2.1.3'
 pipeline {
     agent { label 'maven' }
 
@@ -66,6 +68,27 @@ pipeline {
                 }
             }
         }
+    stage(" Docker Build ") {
+        steps {
+            script {
+               echo '<--------------- Docker Build Started --------------->'
+               app = docker.build(imageName+":"+version)
+               echo '<--------------- Docker Build Ends --------------->'
+            }
+          }
+        }
+    
+    stage (" Docker Publish "){
+        steps {
+            script {
+                echo '<--------------- Docker Publish Started --------------->'  
+                docker.withRegistry(registry, 'jfrogartifact-credentials'){
+                app.push()
+                }    
+                echo '<--------------- Docker Publish Ended --------------->'  
+                }
+            }
+        }        
     }
 
     post {
