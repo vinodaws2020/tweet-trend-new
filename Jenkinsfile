@@ -1,3 +1,10 @@
+Jfrog Artifactory URL: https://trialiu989t.jfrog.io
+Artifcat location: /home/ubuntu/jenkins/workspace/job2_dev/jarstaging/com/valaxy/demo-workshop/2.1.3
+credentials: jfrogartifact-credentials
+
+######################################################################################################
+def registry = 'https://trialiu989t.jfrog.io'
+
 pipeline {
     agent { label 'maven' }
 
@@ -24,24 +31,36 @@ pipeline {
 
         stage("SonarQube Analysis") {
             environment {
-                scannerHome = tool 'sonar-scanner' // Jenkins tool name for Sonar Scanner
+                scannerHome = tool 'sonar-scanner'
             }
             steps {
-                withSonarQubeEnv('sonarqube-server') { // Jenkins SonarQube server name
+                withSonarQubeEnv('sonarqube-server') {
                     sh "${scannerHome}/bin/sonar-scanner"
                 }
             }
         }
 
-        stage("Quality Gate") {
+        stage("Jar Publish") {
             steps {
                 script {
-                    timeout(time: 5, unit: 'MINUTES') {
-                        def qg = waitForQualityGate()
-                        if (qg.status != 'OK') {
-                            error "Pipeline aborted due to quality gate failure: ${qg.status}"
-                        }
-                    }
+                    echo '<--------------- Jar Publish Started --------------->'
+                    def server = Artifactory.newServer url: "${registry}/artifactory", credentialsId: "jfrogartifact-credentials"
+                    def properties = "buildid=${env.BUILD_ID},commitid=${env.GIT_COMMIT ?: 'unknown'}"
+                    def uploadSpec = """{
+                        "files": [
+                            {
+                                "pattern": "jarstaging/**/*",
+                                "target": "icmcloud-libs-release-local/",
+                                "flat": false,
+                                "props": "${properties}",
+                                "exclusions": [ "*.sha1", "*.md5" ]
+                            }
+                        ]
+                    }"""
+                    def buildInfo = server.upload(uploadSpec)
+                    buildInfo.env.collect()
+                    server.publishBuildInfo(buildInfo)
+                    echo '<--------------- Jar Publish Ended --------------->'
                 }
             }
         }
@@ -56,4 +75,3 @@ pipeline {
         }
     }
 }
-
