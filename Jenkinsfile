@@ -1,12 +1,14 @@
-def registry = 'https://trialiu989t.jfrog.io'
-def imageName = 'trialiu989t.jfrog.io/icmcloud-docker-local/namtrend'
-def version   = '2.1.3'
+def registry   = 'https://trialiu989t.jfrog.io'
+def imageName  = 'trialiu989t.jfrog.io/icmcloud-docker-local/namtrend'
+def version    = '2.1.3'
+def app        // global variable for docker image reference
+
 pipeline {
     agent { label 'maven' }
 
     environment {
-        PATH = "/opt/apache-maven-3.9.4/bin:$PATH"
-        registry = 'https://trialiu989t.jfrog.io'
+        PATH     = "/opt/apache-maven-3.9.4/bin:$PATH"
+        registry = "${registry}"
     }
 
     stages {
@@ -68,27 +70,28 @@ pipeline {
                 }
             }
         }
-    stage(" Docker Build ") {
-        steps {
-            script {
-               echo '<--------------- Docker Build Started --------------->'
-               app = docker.build(imageName+":"+version)
-               echo '<--------------- Docker Build Ends --------------->'
-            }
-          }
-        }
-    
-    stage (" Docker Publish "){
-        steps {
-            script {
-                echo '<--------------- Docker Publish Started --------------->'  
-                docker.withRegistry(registry, 'jfrogartifact-credentials'){
-                app.push()
-                }    
-                echo '<--------------- Docker Publish Ended --------------->'  
+
+        stage("Docker Build") {
+            steps {
+                script {
+                    echo '<--------------- Docker Build Started --------------->'
+                    app = docker.build("${imageName}:${version}")
+                    echo '<--------------- Docker Build Ended --------------->'
                 }
             }
-        }        
+        }
+
+        stage("Docker Publish") {
+            steps {
+                script {
+                    echo '<--------------- Docker Publish Started --------------->'
+                    docker.withRegistry("${registry}", 'jfrogartifact-credentials') {
+                        app.push()
+                    }
+                    echo '<--------------- Docker Publish Ended --------------->'
+                }
+            }
+        }
     }
 
     post {
@@ -100,3 +103,4 @@ pipeline {
         }
     }
 }
+
