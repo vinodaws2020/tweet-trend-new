@@ -1,5 +1,5 @@
 def registry   = 'https://trialiu989t.jfrog.io'
-def imageName  = 'trialiu989t.jfrog.io/icmcloud-docker-local/namtrend'
+def imageName  = 'trialiu989t.jfrog.io/icmcloud-docker-local/portalapp'
 def version    = '2.1.3'
 def app        // global variable for docker image reference
 
