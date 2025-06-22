@@ -1,8 +1,3 @@
-Jfrog Artifactory URL: https://trialiu989t.jfrog.io
-Artifact location: /home/ubuntu/jenkins/workspace/job2_dev/jarstaging/com/valaxy/demo-workshop/2.1.3
-credentials: jfrogartifact-credentials
-
-######################################################################################################
 def registry = 'https://trialiu989t.jfrog.io'
 pipeline {
     agent { label 'maven' }
