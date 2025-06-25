@@ -7,8 +7,7 @@ pipeline {
     agent { label 'maven' }
 
     environment {
-        PATH     = "/opt/apache-maven-3.9.4/bin:$PATH"
-        registry = "${registry}"
+        PATH = "/opt/apache-maven-3.9.4/bin:$PATH"
     }
 
     stages {
@@ -45,7 +44,7 @@ pipeline {
                     echo '<--------------- Jar Publish Started --------------->'
 
                     def server = Artifactory.newServer(
-                        url: "${env.registry}/artifactory",
+                        url: "${registry}/artifactory",
                         credentialsId: "jfrogartifact-credentials"
                     )
 
@@ -92,6 +91,14 @@ pipeline {
                 }
             }
         }
+
+        stage("Deploy") {
+            steps {
+                script {
+                    sh './deploy.sh'
+                }
+            }
+        }
     }
 
     post {
@@ -103,4 +110,3 @@ pipeline {
         }
     }
 }
-
